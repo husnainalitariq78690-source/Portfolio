@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAT Studio — AI Powered Workflows</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --bg-panel: rgba(10, 10, 15, 0.5);
+            --bg-panel-hover: rgba(255, 255, 255, 0.05);
+            --text-primary: #FFFFFF;
+            --text-muted: #888888;
+            
+            /* Fusion Colors Exact */
+            --accent-orange: #E64510;
+            --accent-blue: #0A74FF;
+            
+            --border-light: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(255, 255, 255, 0.2);
+            --font-main: 'Inter', sans-serif;
+            --radius-btn: 10px;
+            --radius-card: 20px;
+            --radius-panel: 24px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); cursor: none !important; }
+        html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
+        body { background-color: #030303; color: var(--text-primary); overflow-x: hidden; line-height: 1.6; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+        /* Custom Cursor */
+        .cursor-dot,
+        .cursor-outline { position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; }
+        .cursor-dot { width: 8px; height: 8px; background-color: var(--accent-orange); }
+        .cursor-outline { width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.5); transition: width 0.2s, height 0.2s, background-color 0.2s; }
+        .cursor-hover .cursor-outline { width: 60px; height: 60px; background-color: rgba(230,69,16,0.1); border-color: var(--accent-orange); }
+
+        /* PURE EDGE TO EDGE CONTAINER - No Max-Width to fix dull side space entirely */
+        .container { width: 100%; padding: 0 6vw; position: relative; z-index: 2; margin: 0 auto; }
+        .section-padding { padding: 8vw 0; }
+        
+        /* FUSION AI EXACT BACKGROUND: Beams and massive radial glows bleeding off screen */
+        .global-visuals { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #030303;}
+        .beam-1 { position: absolute; top: -20%; left: -10%; width: 60vw; height: 140vh; background: linear-gradient(135deg, rgba(230,69,16,0.6) 0%, transparent 60%); filter: blur(120px); transform: rotate(15deg); }
+        .beam-2 { position: absolute; bottom: -20%; right: -10%; width: 60vw; height: 140vh; background: linear-gradient(-45deg, rgba(10,116,255,0.5) 0%, transparent 60%); filter: blur(120px); transform: rotate(15deg); }
+        .beam-3 { position: absolute; top: 30%; left: 0; width: 150vw; height: 2px; background: rgba(255,255,255,0.05); transform: rotate(-30deg); box-shadow: 0 0 20px rgba(230,69,16,0.5); }
+        .beam-4 { position: absolute; top: 40%; left: 0; width: 150vw; height: 2px; background: rgba(255,255,255,0.03); transform: rotate(-30deg); }
+
+        /* Typography */
+        h1, h2, h3, h4, h5 { font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; }
+        .section-eyebrow { font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; margin-bottom: 1.5rem; font-weight: 700; padding: 6px 14px; border: 1px solid var(--border-light); border-radius: 50px; width: max-content; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);}
+        .section-title { font-size: clamp(3rem, 5vw, 5rem); margin-bottom: 1.5rem; color: #FFFFFF; font-weight: 700; letter-spacing: -0.04em;}
+
+        /* Buttons Match Fusion AI */
+        .btn-outline { background-color: transparent; border: 1px solid rgba(255,255,255,0.3); color: #FFFFFF; padding: 1rem 2rem; border-radius: var(--radius-btn); font-size: 0.95rem; font-weight: 500; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);}
+        .btn-outline:hover { background-color: rgba(255,255,255,0.05); border-color: #FFFFFF; box-shadow: 0 0 20px rgba(230,69,16,0.3); }
+        
+        .btn-text { background: transparent; border: none; color: var(--text-primary); font-size: 0.95rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; opacity: 0.7; transition: 0.3s; }
+        .btn-text:hover { opacity: 1; color: var(--accent-orange); }
+
+        /* Animations */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden-scroll { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .visible-scroll { opacity: 1; transform: translateY(0); }
+
+        /* Navigation */
+        #nav { position: fixed; top: 0; width: 100%; z-index: 1000; transition: all 0.4s ease; padding: 1.5rem 0; }
+        #nav.scrolled { padding: 1rem 0; background: rgba(3, 3, 3, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.4rem; font-weight: 600; color: #fff; display:flex; align-items:center; gap:10px; letter-spacing:-1px;}
+        .logo i { color: var(--accent-blue); font-size:1.6rem;}
+        .nav-links { display: flex; gap: 3rem; }
+        .nav-link { font-size: 0.85rem; color: var(--text-muted); transition: color 0.3s; font-weight:600;}
+        .nav-link:hover { color: #FFF; text-shadow: 0 0 10px rgba(255,255,255,0.3);}
+
+        /* Hero Layout - Massive Typography, Left Aligned EXACTLY like Fusion AI */
+        #hero { position: relative; min-height: 100vh; display: flex; align-items: center; padding-top: 5vw; border-bottom: 1px solid var(--border-light);}
+        .hero-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center;}
+        
+        .hero-title { font-size: clamp(3.5rem, 6vw, 7rem); color: #fff; line-height: 0.95; margin: 0 0 2rem; letter-spacing:-0.05em; font-weight:700;}
+        .hero-desc { font-size: 1.15rem; color: var(--text-muted); max-width: 500px; margin-bottom: 3rem; line-height: 1.6; font-weight:400;}
+        
+        /* Hero Mockup precisely mapping Fusion AI floating panels */
+        .hero-mockup-wrap { position:relative; perspective: 1000px; }
+        .hero-mockup-frame { border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; background: rgba(0,0,0,0.6); backdrop-filter:blur(30px); box-shadow: 0 40px 80px rgba(0,0,0,0.9); position:relative; overflow:hidden; transform: rotateY(-5deg) rotateX(5deg); transition: transform 0.5s ease;}
+        .hero-mockup-wrap:hover .hero-mockup-frame { transform: rotateY(0deg) rotateX(0deg); }
+        .hero-mockup-frame img { width: 100%; border-radius: 12px; object-fit: cover; display:block; filter: grayscale(10%) contrast(1.1); transition: filter 0.5s;}
+        .hero-mockup-wrap:hover .hero-mockup-frame img { filter: grayscale(0%) contrast(1); }
+        
+        .mockup-glow-inner { position: absolute; bottom:-20%; left:-20%; width: 140%; height: 60%; background: radial-gradient(circle, rgba(10,116,255,0.15) 0%, transparent 70%); pointer-events: none;}
+        
+        .mockup-ui-float { position: absolute; bottom: -20px; left: -20px; right: 20px; background: rgba(10,10,15,0.85); border: 1px solid var(--accent-blue); border-radius: 16px; padding: 20px; backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 40px rgba(10,116,255,0.2); transform: translateZ(30px); transition: transform 0.4s;}
+        .hero-mockup-wrap:hover .mockup-ui-float { transform: translateZ(50px) translateY(-10px); box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 50px rgba(10,116,255,0.3);}
+        
+        .m-top { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;}
+        .m-top span { background: rgba(255,255,255,0.08); font-size: 0.75rem; padding: 6px 12px; border-radius: 6px; color: #fff; font-weight: 500;}
+        .m-input { width: 100%; background: transparent; border: none; color: #fff; font-size: 0.95rem; margin-bottom: 20px; outline:none;}
+        .m-input::placeholder { color: var(--text-muted); }
+        .m-btns { display: flex; gap: 10px; }
+        .m-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 16px; font-size: 0.8rem; color: #fff; display: flex; align-items: center; gap: 8px; transition: all 0.3s;}
+        .m-btn:hover { background: rgba(230,69,16,0.1); border-color: var(--accent-orange); color: var(--accent-orange);}
+
+        @media (max-width: 1024px) {
+            .hero-container { grid-template-columns: 1fr; gap: 4rem;}
+            .nav-links { display: none; }
+            .container { padding: 0 8vw; }
+        }
+
+        /* Stats Strip */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid var(--border-light); background: rgba(0,0,0,0.5); position:relative; z-index:2;}
+        .stat-card { padding: 4vw 2vw; text-align: center; border-right: 1px solid var(--border-light); backdrop-filter: blur(10px);}
+        .stat-card:last-child { border-right: none;}
+        .stat-num-wrapper { font-size: 3.5rem; font-weight: 700; line-height: 1; color: #fff; letter-spacing: -0.03em;}
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; font-weight: 600; text-transform: uppercase; letter-spacing:1px;}
+
+        /* Video Showcase with Orange Glow Hover */
+        #work { position: relative; border-bottom: 1px solid var(--border-light); z-index:2;}
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 3vw; margin-top: 4vw; }
+        .vid-card { border-radius: var(--radius-panel); background: rgba(5,5,5,0.8); border: 1px solid var(--border-light); padding: 12px; transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); backdrop-filter: blur(20px);}
+        .vid-card:hover { transform: translateY(-8px); border-color: var(--accent-orange); box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 30px rgba(230,69,16,0.2); }
+        .vid-thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; }
+        .vid-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; filter: brightness(0.85); }
+        .vid-card:hover .vid-thumb img { transform: scale(1.05); filter: brightness(1) }
+        
+        .vid-info { padding: 1.5rem 0.5rem 0.5rem; }
+        .vid-title { font-size: 1.25rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; letter-spacing: -0.02em; transition: color 0.3s;}
+        .vid-card:hover .vid-title { color: var(--accent-orange); }
+        .vid-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;}
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor Setup -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <div class="global-visuals">
+        <div class="beam-1"></div>
+        <div class="beam-2"></div>
+        <div class="beam-3"></div>
+        <div class="beam-4"></div>
+    </div>
+
+    <nav id="nav">
+        <div class="container nav-inner">
+            <div class="logo"><i class="fa-solid fa-layer-group"></i> HAT Studio</div>
+            <div class="nav-links">
+                <a href="#work" class="nav-link interactable">Work</a>
+                <a href="#youtube" class="nav-link interactable">Automation</a>
+                <a href="#services" class="nav-link interactable">Services</a>
+                <a href="#about" class="nav-link interactable">About</a>
+            </div>
+            <button class="btn-outline interactable" onclick="document.querySelector('#contact').scrollIntoView()">Start Project</button>
+        </div>
+    </nav>
+
+    <header id="hero" class="section-padding">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <div class="section-eyebrow" style="animation: fadeUp 0.8s forwards">Supercharge your AI workflows</div>
+                <h1 class="hero-title" style="animation: fadeUp 0.8s 0.2s forwards; opacity:0;">Automate Your <br>Creative Vision <br>with AI Agent</h1>
+                <p class="hero-desc" style="animation: fadeUp 0.8s 0.4s forwards; opacity:0;">Connect your favorite apps, set triggers and watch AI handle the rest — no coding required. Get up and running in minutes.</p>
+                <div style="display: flex; align-items:center; gap: 2.5rem; animation: fadeUp 0.8s 0.6s forwards; opacity:0;">
+                    <button class="btn-outline interactable" onclick="document.querySelector('#work').scrollIntoView()">Get Started - Free</button>
+                    <button class="btn-text interactable" onclick="document.querySelector('#contact').scrollIntoView()">View Pricing</button>
+                </div>
+            </div>
+            
+            <div class="hero-visual" style="animation: fadeUp 1s 0.3s forwards; opacity:0;">
+                <div class="hero-mockup-wrap">
+                    <div class="hero-mockup-frame interactable">
+                        <div class="mockup-glow-inner"></div>
+                        <img src="C:/Users/PC/Downloads/Whisk_7f050491e6fd56b82b14027547bfc9c6dr.png" style="aspect-ratio:3/4;" alt="HAT Studio Showcase">
+                    </div>
+                    <div class="mockup-ui-float">
+                        <div class="m-top">
+                            <span><i class="fa-solid fa-sparkles"></i> GPT 4.0</span>
+                            <span style="background:transparent; color:var(--text-muted);"><i class="fa-solid fa-chevron-down"></i></span>
+                        </div>
+                        <input type="text" class="m-input interactable" placeholder="| A whole new way to work." readonly>
+                        <div class="m-btns">
+                            <div class="m-btn interactable"><i class="fa-solid fa-comment"></i> Chat</div>
+                            <div class="m-btn interactable"><i class="fa-solid fa-image"></i> Image generator</div>
+                            <div class="m-btn interactable"><i class="fa-solid fa-video"></i> Video generator</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="stats-section">
+        <div class="container" style="padding:0;">
+            <div class="stats-grid hidden-scroll">
+                <div class="stat-card">
+                    <div class="stat-num-wrapper"><span class="stat-num" data-target="3">0</span><span style="color:var(--accent-orange);">+</span></div>
+                    <div class="stat-label">Years of Craft</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num-wrapper"><span class="stat-num" data-target="50">0</span><span style="color:var(--accent-orange);">+</span></div>
+                    <div class="stat-label">Projects Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num-wrapper"><span class="stat-num" data-target="50">0</span><span style="color:var(--accent-blue);">+</span></div>
+                    <div class="stat-label">Channels Monetized</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num-wrapper"><span class="stat-num" data-target="98">0</span><span style="color:var(--text-muted); font-size:1.5rem">%</span></div>
+                    <div class="stat-label">Client Satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="work" class="section-padding">
+        <div class="container">
+            <div class="section-eyebrow hidden-scroll">Data-Driven Features</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+                <h2 class="section-title hidden-scroll" style="margin-bottom: 0;">Empowering Growth<br>Through Scalable AI.</h2>
+            </div>
+            
+            <div class="portfolio-grid">
+                <div class="vid-card hidden-scroll interactable" style="transition-delay: 0.1s;">
+                    <div class="vid-thumb">
+                        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80" alt="Travel Reel">
+                    </div>
+                    <div class="vid-info">
+                        <h3 class="vid-title">Cinematic Source Sequence</h3>
+                        <div class="vid-meta"><span>DaVinci · Premiere Pro</span><span style="color:#fff;">2.4M Views</span></div>
+                    </div>
+                </div>
+                <div class="vid-card hidden-scroll interactable" style="transition-delay: 0.2s;">
+                    <div class="vid-thumb">
+                        <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=800&q=80" alt="YouTube Package">
+                    </div>
+                    <div class="vid-info">
+                        <h3 class="vid-title">SaaS Channel Launch Stack</h3>
+                        <div class="vid-meta"><span>Premiere · After Effects</span><span style="color:#fff;">890K Views</span></div>
+                    </div>
+                </div>
+                <div class="vid-card hidden-scroll interactable" style="transition-delay: 0.3s;">
+                    <div class="vid-thumb">
+                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80" alt="Motion Graphics">
+                    </div>
+                    <div class="vid-info">
+                        <h3 class="vid-title">CyberTech Brand Reveal</h3>
+                        <div class="vid-meta"><span>After Effects 3D</span><span style="color:#fff;">Client Project</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <style>
+        /* Part 2 Scoped Styles - Full Edge To Edge Beams & Animations */
+        #youtube { position: relative; border-bottom: 1px solid var(--border-light); z-index:2;}
+        .yt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; }
+        .yt-features { display: flex; flex-direction: column; gap: 1rem; margin-top: 2.5rem; }
+        .win-item { font-size: 0.95rem; font-weight: 500; color: #fff; display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.02); padding: 14px 24px; border-radius: var(--radius-btn); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; backdrop-filter: blur(10px);}
+        .win-item:hover { background: rgba(255,255,255,0.05); border-color:rgba(230,69,16,0.3); transform: translateX(5px); box-shadow: 0 0 20px rgba(230,69,16,0.1);}
+        .win-item i { color: var(--accent-orange); font-size: 1.2rem;}
+        
+        .yt-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .yt-stat-box { padding: 3vw 1.5vw; text-align: center; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); transition: all 0.4s; backdrop-filter: blur(20px);}
+        .yt-stat-box:hover { transform: translateY(-5px); border-color: rgba(10,116,255,0.3); box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 0 20px rgba(10,116,255,0.15); }
+        .yt-stat-num { font-size: clamp(2.5rem, 4vw, 4rem); color: #fff; line-height: 1; font-weight: 700; letter-spacing:-0.05em;}
+        .yt-stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.8rem; letter-spacing: 1px; font-weight: 600;}
+
+        /* Search Bar mimicking input commands */
+        .search-container { max-width: 650px; margin: 4vw auto 3rem; display: flex; position: relative; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(5,5,5,0.8); backdrop-filter:blur(24px); padding: 6px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);}
+        .search-input { width: 100%; padding: 1.2rem 1.5rem; font-size: 1rem; background: transparent; border: none; color: var(--text-primary); outline: none; }
+        .search-input::placeholder { color: var(--text-muted); }
+        .search-btn { border-radius: 8px; background: #fff; color: #000; font-weight: 600; padding: 0 2.5rem; transition: all 0.3s; font-size:0.95rem; display:flex; align-items:center; gap:8px;}
+        .search-btn:hover { background: #e0e0e0; box-shadow: 0 0 20px rgba(255,255,255,0.2);}
+
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5vw; }
+        .cat-card { padding: 2.5rem; text-align: left; background: rgba(255,255,255,0.03); border-radius: var(--radius-panel); transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); border: 1px solid rgba(255,255,255,0.05); backdrop-filter:blur(20px);}
+        .cat-card:hover { border-color: rgba(230,69,16,0.3); background: rgba(230,69,16,0.05); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(230,69,16,0.15);}
+        .cat-card.active { border-color: var(--accent-orange); background: rgba(230,69,16,0.08); box-shadow: 0 0 40px rgba(230,69,16,0.2);}
+        .cat-icon { font-size: 2.5rem; margin-bottom: 2rem; color: #fff; transition: transform 0.3s;}
+        .cat-card:hover .cat-icon { transform: scale(1.1) rotate(5deg); color: var(--accent-orange);}
+        .cat-name { font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.02em;}
+        
+        /* Fusion Pricing Spec Panel */
+        .cat-detail-panel { margin-top: 4rem; display: none; padding: 4vw; background: rgba(0,0,0,0.4); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-panel); position: relative; overflow: hidden; animation: fadeUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        
+        .panel-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; margin: 3rem 0; text-align: left; }
+        .panel-stat-box { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:2vw; transition: 0.3s;}
+        .panel-stat-box:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05);}
+        
+        .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; position:relative; z-index:2;}
+        .pkg-card { padding: 3vw 2vw; border-radius: 24px; position: relative; background: rgba(10,10,15,0.8); border: 1px solid rgba(255,255,255,0.08); transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);}
+        .pkg-card:hover { border-color: var(--accent-blue); background: rgba(10,116,255,0.05); transform: translateY(-5px); box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 30px rgba(10,116,255,0.2);}
+        .pkg-pop-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; font-size: 0.75rem; padding: 8px 20px; border-radius: 50px; font-weight: 700; letter-spacing: 1px; font-family: var(--font-main); }
+        .pkg-feat-row { padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; color: var(--text-muted); display:flex; align-items:center; gap:12px; font-weight: 400;}
+
+        /* Services Grid - Exact Match Premium Animation */
+        #services { position: relative; z-index:1;}
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; margin-top: 4vw; }
+        .srv-card { background: rgba(5,5,5,0.6); border-radius: var(--radius-panel); padding: 3.5vw; position: relative; transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px);}
+        .srv-card:hover { border-color: var(--accent-orange); background: rgba(230,69,16,0.05); transform: translateY(-8px); box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(230,69,16,0.15);}
+        .srv-icon-wrap { font-size: 2.5rem; color: #fff; margin-bottom: 2rem; transition: all 0.4s; }
+        .srv-card:hover .srv-icon-wrap { color: var(--accent-orange); transform: scale(1.1);}
+        .srv-title { font-size: 1.6rem; font-weight: 700; color: #fff; margin-bottom: 1rem; letter-spacing: -0.02em;}
+        .srv-desc { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; font-weight: 400;}
+
+        /* WebGL Background */
+        .canvas-wrapper { height: 600px; border-radius: var(--radius-panel); overflow: hidden; position: relative; background: #000; border: 1px solid rgba(255,255,255,0.1); margin-top: 4vw; box-shadow: 0 40px 80px rgba(0,0,0,0.8);}
+        
+        /* About Grid */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; }
+        .about-img-box { position: relative; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); height: 800px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
+        .about-img-box img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(10%) contrast(1.1); transition: transform 0.8s ease, filter 0.5s ease;}
+        .about-img-box:hover img { transform: scale(1.05); filter: grayscale(0) contrast(1.05); }
+        
+        .platform-grid { display: flex; gap: 1.5rem; margin-top: 2rem; }
+        .platform-link { display:flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:1.6rem; transition:all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); background: rgba(255,255,255,0.02); backdrop-filter: blur(10px);}
+        .platform-link:hover { border-color:var(--accent-blue); background:rgba(10,116,255,0.1); color:#fff; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(10,116,255,0.2);}
+
+        /* Contact Section */
+        #contact { background: #000; position:relative; border-top: 1px solid var(--border-light); z-index:2;}
+        .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 8vw; align-items: center;}
+        
+        .contact-info-list { display: flex; flex-direction: column; gap: 2rem; margin-top: 4rem; }
+        .contact-info-card { display: flex; align-items: center; gap: 1.8rem; padding: 2.5rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; transition: all 0.4s; background: rgba(10,10,15,0.6); backdrop-filter: blur(20px);}
+        .contact-info-card:hover { border-color: rgba(230,69,16,0.3); background: rgba(230,69,16,0.05); transform: translateX(10px); box-shadow: 0 10px 30px rgba(230,69,16,0.15);}
+        
+        /* Contact Form Space */
+        .form-panel { position:relative; padding: 4vw; background: rgba(10,10,15,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; backdrop-filter: blur(30px); box-shadow: 0 40px 80px rgba(0,0,0,0.8);}
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .form-full { grid-column: 1 / -1; }
+        
+        .input-group { position: relative; width: 100%; border-radius: 12px; overflow: hidden;}
+        .input-base { background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.15); padding: 1.2rem 1rem; color: var(--text-primary); width: 100%; font-size: 1.05rem; transition: all 0.3s; outline: none; border-radius: 0; background: rgba(255,255,255,0.02);}
+        .input-base::placeholder { color: var(--text-muted); }
+        .input-base:focus { border-bottom-color: var(--accent-blue); background: rgba(255,255,255,0.05);}
+        
+        textarea.input-base { resize: none; min-height: 160px;}
+
+        @media (max-width: 1024px) {
+            .yt-grid, .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 5rem; }
+            .services-grid, .panel-stats, .pkg-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+
+    <section id="youtube" class="section-padding">
+        <div class="beam-3" style="top:20%; left:-20%; width:100vw; transform:rotate(-15deg);"></div>
+        <div class="container">
+            <div class="section-eyebrow hidden-scroll">Intelligent Workflows</div>
+            
+            <div class="yt-grid hidden-scroll">
+                <div>
+                    <h2 class="section-title">Scale your complete architecture <br>with precision matching.</h2>
+                    <p style="color: var(--text-muted); font-size:1.2rem; line-height:1.7; max-width:600px; font-weight:400;">We have systematically structured and fully monetized over 50 exclusive channels globally. Watch our protocol handle the complex algorithms—no coding required.</p>
+                    <div class="yt-features">
+                        <div class="win-item interactable"><i class="fa-solid fa-arrow-right"></i> Intelligent Niche Analysis & Setup Protocols</div>
+                        <div class="win-item interactable"><i class="fa-solid fa-arrow-right"></i> Scripting, Editing & High-end Visual Effects</div>
+                        <div class="win-item interactable"><i class="fa-solid fa-arrow-right"></i> Core SEO & Click-Through Optimization</div>
+                    </div>
+                </div>
+                <!-- Right Side UI Panel matching Fusion Stats Area -->
+                <div style="background:rgba(0,0,0,0.8); padding:1.5rem; border-radius:32px; border:1px solid rgba(255,255,255,0.08); box-shadow:0 40px 80px rgba(0,0,0,0.9); position:relative; backdrop-filter:blur(30px);">
+                    <div style="background:rgba(10,116,255,0.03); border-radius:24px; padding:4vw; border:1px solid rgba(10,116,255,0.1);">
+                        <div style="color:var(--accent-blue); font-size:0.8rem; font-weight:700; letter-spacing:1.5px; margin-bottom:2.5rem; text-transform:uppercase; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-chart-line"></i> Core Metrics Viewport</div>
+                        <div class="yt-stats-grid">
+                            <div class="yt-stat-box interactable">
+                                <div class="yt-stat-num">50+</div>
+                                <div class="yt-stat-label">Channels Built</div>
+                            </div>
+                            <div class="yt-stat-box interactable">
+                                <div class="yt-stat-num">12</div>
+                                <div class="yt-stat-label">Avg. Months</div>
+                            </div>
+                            <div class="yt-stat-box interactable" style="background:rgba(230,69,16,0.03); border-color:rgba(230,69,16,0.1);">
+                                <div class="yt-stat-num" style="color:var(--accent-orange)">2.4M</div>
+                                <div class="yt-stat-label">Views Generated</div>
+                            </div>
+                            <div class="yt-stat-box interactable">
+                                <div class="yt-stat-num">9+</div>
+                                <div class="yt-stat-label">Profitable Niches</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 8vw;" class="hidden-scroll">
+                <div class="search-container">
+                    <input type="text" id="catSearch" class="search-input interactable" placeholder="Analyze a domain (e.g., Tech, Finance, SAAS)...">
+                    <button class="search-btn interactable" onclick="searchCat()"><i class="fa-solid fa-bolt"></i> Synthesize</button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 1rem;">Or select a pre-built category pattern below to deploy instantly.</p>
+            </div>
+
+            <div class="cat-grid hidden-scroll" id="cat-grid"></div>
+            <div id="cat-detail" class="cat-detail-panel"></div>
+        </div>
+    </section>
+
+    <section id="services" class="section-padding">
+        <div class="container">
+            <div class="section-eyebrow hidden-scroll">Platform Capabilities</div>
+            <h2 class="section-title hidden-scroll">AI-Driven Services Stack</h2>
+            
+            <div class="services-grid hidden-scroll">
+                <div class="srv-card interactable">
+                    <div class="srv-icon-wrap"><i class="fa-solid fa-layer-group"></i></div>
+                    <h3 class="srv-title">Video Architecture</h3>
+                    <p class="srv-desc">Retention-optimized long-form edits, animated captions, high-quality b-roll integration, and precisely calculated pacing mechanisms.</p>
+                </div>
+                <div class="srv-card interactable">
+                    <div class="srv-icon-wrap"><i class="fa-solid fa-bolt"></i></div>
+                    <h3 class="srv-title">Commercial Execution</h3>
+                    <p class="srv-desc">Brand-story edits with tight pacing and professional sound design specifically crafted for high-conversion performance advertisements.</p>
+                </div>
+                <div class="srv-card interactable">
+                    <div class="srv-icon-wrap"><i class="fa-solid fa-cubes"></i></div>
+                    <h3 class="srv-title">Motion Frameworks</h3>
+                    <p class="srv-desc">Engaging animated titles, pristine lower thirds, and impactful kinetic typography utilizing advanced After Effects data pipelines.</p>
+                </div>
+                <div class="srv-card interactable">
+                    <div class="srv-icon-wrap"><i class="fa-solid fa-palette"></i></div>
+                    <h3 class="srv-title">Color Intelligence</h3>
+                    <p class="srv-desc">Cinematic color grading within DaVinci Resolve — generating strict LUTs and creating Hollywood-grade film environments.</p>
+                </div>
+                <div class="srv-card interactable">
+                    <div class="srv-icon-wrap"><i class="fa-solid fa-robot"></i></div>
+                    <h3 class="srv-title">Autonomous Content</h3>
+                    <p class="srv-desc">Complete channel provision: setup, continuous generation via hybrid workflows, advanced SEO implementation, and monetization.</p>
+                </div>
+                <div class="srv-card interactable" style="border: 1px solid rgba(255,255,255,0.4); background:rgba(255,255,255,0.05);">
+                    <div class="srv-icon-wrap"><i class="fa-solid fa-gem"></i></div>
+                    <h3 class="srv-title">The Complete System</h3>
+                    <p class="srv-desc">Comprehensive editing, grading, motion schemas, intelligent sound design, and full pipeline automation. Zero compromises on flow.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="threejs" style="position:relative; z-index:2;">
+        <div class="container section-padding">
+            <div class="section-eyebrow hidden-scroll">Interactive Component Workspace</div>
+            <h2 class="section-title hidden-scroll">Live WebGL Environment</h2>
+            
+            <div id="threejs-canvas-wrapper" class="canvas-wrapper hidden-scroll interactable"></div>
+        </div>
+    </section>
+
+    <section id="about" class="section-padding" style="position:relative; z-index:2;">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-img-box hidden-scroll">
+                    <!-- Corrected User Image mapping exact filename -->
+                    <img src="C:/Users/PC/Downloads/Whisk_7f050491e6fd56b82b14027547bfc9c6dr.png" alt="Husnain Ali Tariq">
+                </div>
+                <div class="hidden-scroll">
+                    <div class="section-eyebrow">System Architect</div>
+                    <h2 class="section-title">The Cinematic Engineer <br>Behind the Code</h2>
+                    <p style="color: var(--text-muted); font-size:1.15rem; line-height: 1.8; margin-bottom: 2.5rem; font-weight:400;">Hello! I am Husnain Ali Tariq — a professional video editor, motion designer, and YouTube automation specialist. With over 3 years of rigorous experience, I've consistently delivered scalable visual results for elite international clients and growing tech businesses worldwide.</p>
+                    
+                    <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom: 4rem;">
+                        <span style="border:1px solid rgba(255,255,255,0.1); padding:10px 20px; border-radius:8px; font-size:0.95rem; background:rgba(255,255,255,0.02); font-weight:500;">Premiere Pro Engine</span>
+                        <span style="border:1px solid rgba(255,255,255,0.1); padding:10px 20px; border-radius:8px; font-size:0.95rem; background:rgba(255,255,255,0.02); font-weight:500;">After Effects Pipeline</span>
+                        <span style="border:1px solid rgba(255,255,255,0.1); padding:10px 20px; border-radius:8px; font-size:0.95rem; background:rgba(255,255,255,0.02); font-weight:500;">DaVinci Color Nodes</span>
+                        <span style="border:1px solid rgba(255,255,255,0.1); padding:10px 20px; border-radius:8px; font-size:0.95rem; background:rgba(255,255,255,0.02); font-weight:500;">Workflow Automation</span>
+                    </div>
+
+                    <div class="platform-grid">
+                        <a href="https://www.fiverr.com/users/husnainstudio78" target="_blank" class="platform-link interactable" title="Fiverr">fi</a>
+                        <a href="https://www.upwork.com/freelancers/~0159615aa731a68aaf" target="_blank" class="platform-link interactable" title="Upwork">Up</a>
+                        <a href="https://www.linkedin.com/in/husnain-ali-6411082b7" target="_blank" class="platform-link interactable" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                        <a href="https://drive.google.com/drive/folders/1F8sOUEf1fhnIiNDXCVWRpxTUccEGXVtb" target="_blank" class="platform-link interactable" title="Portfolio"><i class="fa-solid fa-folder"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section-padding">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="hidden-scroll">
+                    <div class="section-eyebrow">Initialize Project Subroutine</div>
+                    <h2 class="section-title">Seamless Integrations <br>& Deployment.</h2>
+                    <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 2rem;">Transmit your parameters below and I will synthesize a response within 24 hours. Let's engineer your vision into a scalable, highly converting visual machine.</p>
+                    
+                    <div class="contact-info-list">
+                        <a href="https://wa.me/923217110706" target="_blank" class="contact-info-card interactable">
+                            <i class="fa-brands fa-whatsapp" style="font-size:2.5rem; color:var(--accent-orange);"></i>
+                            <div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight:600; letter-spacing:1px; margin-bottom:4px;">Secure Direct Action</div>
+                                <div style="font-size: 1.35rem; color: #fff; font-weight:700; letter-spacing:-0.5px;">+92 321 7110706</div>
+                            </div>
+                        </a>
+                        <a href="mailto:husnainalitariq78690@gmail.com" class="contact-info-card interactable">
+                            <i class="fa-solid fa-envelope" style="font-size:2.5rem; color:var(--accent-blue);"></i>
+                            <div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight:600; letter-spacing:1px; margin-bottom:4px;">System Email</div>
+                                <div style="font-size: 1.35rem; color: #fff; font-weight:700; letter-spacing:-0.5px;">husnainalitariq78690@gmail.com</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="form-panel hidden-scroll">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <input type="text" id="fn" class="input-base interactable" placeholder="Identifier Name *">
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="fe" class="input-base interactable" placeholder="Email Address *">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="fp" class="input-base interactable" placeholder="Contact Channel (Phone)">
+                        </div>
+                        <div class="input-group">
+                            <select id="fb" class="input-base interactable" style="appearance: none;">
+                                <option value="" disabled selected>Capital Range Payload</option>
+                                <option value="$50-100">$50–$100 Base Line</option>
+                                <option value="$100-300">$100–$300 Advanced</option>
+                                <option value="$300-500">$300–$500 Pro Workflow</option>
+                                <option value="$500-1000">$500–$1000 Enterprise</option>
+                                <option value="$1000+">$1000+ Custom Protocol</option>
+                            </select>
+                        </div>
+                        <div class="input-group form-full">
+                            <select id="fs" class="input-base interactable" style="appearance: none;">
+                                <option value="" disabled selected>Primary Service Vector *</option>
+                                <option value="YouTube Video Editing">YouTube Content Architecture</option>
+                                <option value="Commercial Editing">Commercial Assembly Line</option>
+                                <option value="Motion Graphics">Motion Graphic Frameworks</option>
+                                <option value="Color Grading">Color Intelligence Maps</option>
+                                <option value="YouTube Automation">Full Channel Automation Protocol</option>
+                            </select>
+                        </div>
+                        <div class="input-group form-full">
+                            <textarea id="fd" class="input-base interactable" placeholder="Define project data payload — visual styling, length targets, deadline parameters... *"></textarea>
+                        </div>
+                        
+                        <button class="btn-outline form-full interactable" onclick="sendWhatsApp()" style="justify-content:center; padding: 1.5rem; margin-top: 2rem; font-size:1rem; border-color:var(--accent-blue); background:rgba(10,116,255,0.05); color:#fff; font-weight:600;">Transmit to WhatsApp Gateway <i class="fa-solid fa-paper-plane" style="margin-left: 10px;"></i></button>
+                        <div id="form-err" style="color:var(--accent-orange); font-size:0.95rem; text-align:center; height:20px; font-weight:500; margin-top:10px;" class="form-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Intelligent Assistant Component -->
+    <button id="chatbot-btn" class="interactable" style="position: fixed; bottom: 3vw; right: 3vw; z-index: 900; width: 68px; height: 68px; font-size: 1.6rem; background: #fff; color: #000; border-radius: 50%; display:flex; align-items:center; justify-content:center; box-shadow: 0 20px 40px rgba(0,0,0,0.8); transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); border:none;" onclick="toggleChat()">
+        <i class="fa-solid fa-bolt"></i>
+    </button>
+
+    <div id="chatbot-window">
+        <div class="chat-header">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size:1.2rem; flex-shrink:0;">H</div>
+            <div>
+                <div style="font-size: 1rem; font-weight: 700; color:#fff; letter-spacing:-0.02em;">HAT Assistant Engine</div>
+                <div style="font-size: 0.75rem; color: var(--accent-blue); display: flex; align-items: center; gap: 8px; font-weight:600;"><span style="width:8px;height:8px;background:var(--accent-blue);border-radius:50%;display:inline-block;box-shadow:0 0 15px var(--accent-blue);"></span> System Online</div>
+            </div>
+            <button onclick="toggleChat()" class="interactable" style="margin-left:auto; background:transparent; color:var(--text-muted); font-size:1.4rem; transition:color 0.3s; border:none; outline:none;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="chat-msg msg-bot">System Initialized. I am the HAT Studio automated data assistant. Input a command or select a quick option to configure your workflow.</div>
+            <div style="display:flex; flex-wrap:wrap; gap:12px;">
+                <button class="chat-quick-btn interactable" onclick="sendQuickMsg('Run Monetization Script')">Execute Monetization</button>
+                <button class="chat-quick-btn interactable" onclick="sendQuickMsg('Fetch Pricing Matrix')">Data: Pricing</button>
+                <button class="chat-quick-btn interactable" onclick="sendQuickMsg('Generate Examples')">Compile Directory</button>
+            </div>
+        </div>
+        <div class="chat-input" onkeypress="if(event.key === 'Enter') sendChatMsg()">
+            <input type="text" id="chat-input-text" class="interactable" placeholder="Type a command...">
+            <button class="chat-send-btn interactable" onclick="sendChatMsg()"><i class="fa-solid fa-arrow-up"></i></button>
+        </div>
+    </div>
+
+    <!-- CTA & Footer -->
+    <section id="cta" class="section-padding" style="text-align: center; position: relative; z-index:2; border-bottom: 1px solid var(--border-light);">
+        <div class="beam-1" style="top:50%; left:50%; width:100vw; height:50vh; transform: translate(-50%, -50%) rotate(0deg); opacity:0.3; z-index:0; filter:blur(150px);"></div>
+        <div class="container" style="position: relative; z-index: 1;">
+            <div class="section-eyebrow hidden-scroll" style="margin-inline:auto;">Initialize Sequence</div>
+            <h2 class="section-title hidden-scroll" style="font-size: clamp(4rem, 7vw, 7.5rem); margin-bottom: 2rem; line-height: 1;">Ready to Scale <br>Your Architecture?</h2>
+            <p class="hidden-scroll" style="color: var(--text-muted); margin-bottom: 4rem; font-size: 1.35rem; max-width: 600px; margin-inline: auto;">Connect your current data streams and watch our intelligent video workflow handle the rest. Launch your infrastructure within minutes.</p>
+            <div class="hidden-scroll" style="display: flex; gap: 1.5rem; justify-content: center;">
+                <a href="#contact" class="btn-outline interactable" style="border-color:#fff; padding:1.4rem 3rem; font-size:1.1rem; background:rgba(255,255,255,0.05);">Initialize Process - Free</a>
+            </div>
+        </div>
+    </section>
+
+    <footer id="footer" style="padding: 4rem 0; background: #000;">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem; font-size: 1rem; color: var(--text-muted); font-weight:500;">
+            <div style="display:flex; align-items:center; gap:12px;"><i class="fa-solid fa-code" style="color:#fff;"></i> © 2026 Developed by HAT Studio</div>
+            <div style="display: flex; gap: 3rem;">
+                <a href="#" class="interactable nav-link">Documentation</a>
+                <a href="#" class="interactable nav-link">Status</a>
+                <a href="#" class="interactable nav-link">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* Chatbot Clean Aesthetics */
+        #chatbot-window { position: fixed; bottom: 9vw; right: 3vw; z-index: 890; width: 420px; background: rgba(10,10,15,0.8); backdrop-filter:blur(40px); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; box-shadow: 0 40px 80px rgba(0,0,0,0.9), 0 0 40px rgba(10,116,255,0.1); display: none; flex-direction: column; opacity: 0; transform: translateY(30px) scale(0.95); transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); overflow: hidden; }
+        #chatbot-window.open { display: flex; opacity: 1; transform: translateY(0) scale(1); }
+        .chat-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.03); }
+        .chat-body { height: 400px; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .chat-msg { max-width: 85%; padding: 16px 20px; border-radius: 12px; font-size: 0.95rem; line-height: 1.6; animation: fadeUp 0.3s ease forwards;}
+        .msg-bot { background: rgba(255,255,255,0.05); align-self: flex-start; color: #fff; border: 1px solid rgba(255,255,255,0.1);}
+        .msg-usr { background: #fff; color: #000; align-self: flex-end; font-weight: 500; border: 1px solid #fff;}
+        .chat-quick-btn { font-size: 0.85rem; padding: 10px 18px; background: rgba(10,116,255,0.05); border: 1px solid rgba(10,116,255,0.3); border-radius: 8px; color: #fff; transition: all 0.3s;}
+        .chat-quick-btn:hover { background: rgba(10,116,255,0.15); border-color:var(--accent-blue); transform: translateY(-2px);}
+        .chat-input { display: flex; padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); gap: 1.5rem; background: rgba(255,255,255,0.03);}
+        .chat-input input { flex: 1; background: transparent; border: none; padding: 0.5rem; color: #fff; font-size: 1.05rem; outline: none;}
+        .chat-input input::placeholder { color: var(--text-muted); }
+        .chat-send-btn { width: 44px; height: 44px; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 1rem; border:none; transition:0.3s;}
+        .chat-send-btn:hover { background: var(--accent-blue); color:#fff; transform:scale(1.1);}
+    </style>
+
+    <script>
+        /* Custom Cursor Logic */
+        const cursorDot = document.getElementById("cursor-dot");
+        const cursorOutline = document.getElementById("cursor-outline");
+
+        window.addEventListener("mousemove", (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            // Adding slight lag for sleek motion feeling
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards", easing: "ease-out" });
+        });
+
+        // Add swelling effect for interactable classes
+        const interactables = document.querySelectorAll('.interactable');
+        interactables.forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                document.body.classList.add('cursor-hover');
+            });
+            link.addEventListener('mouseleave', () => {
+                document.body.classList.remove('cursor-hover');
+            });
+        });
+
+        // DOM Elements for normal UX actions
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            if(window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('visible-scroll');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.hidden-scroll').forEach(el => observer.observe(el));
+
+        // Number Counter
+        const countUpObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    let el = entry.target;
+                    let target = parseInt(el.getAttribute('data-target'));
+                    let duration = 2000;
+                    let startTime = null;
+                    function countUp(timestamp) {
+                        if (!startTime) startTime = timestamp;
+                        let progress = timestamp - startTime;
+                        let current = Math.min(Math.floor((progress / duration) * target), target);
+                        el.innerText = current;
+                        if (progress < duration) requestAnimationFrame(countUp);
+                    }
+                    requestAnimationFrame(countUp);
+                    countUpObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.stat-num').forEach(el => countUpObserver.observe(el));
+
+        // YouTube Automation Config Data
+        const ytCategories = [
+            { key: "tech", icon: "💻", name: "Technology Architecture", desc: "Software, Hardware, AI Tools", r: "$6–$14", t: "3–6 Months", s: "1K–10K",
+              pkgs: [{name:"Development", price:"$299/mo", f:["5 Workflow Outputs", "Base SEO Map"]}, {name:"Growth Matrix", price:"$499/mo", f:["10 Workflow Outputs", "Full Data Scope"], pop:true}, {name:"Enterprise", price:"$899/mo", f:["20 Workflow Outputs", "Auto Monetize"]}] },
+            { key: "finance", icon: "💰", name: "Finance Protocol", desc: "Capital, Crypto, Investment", badge: "Max Margin", r: "$8–$25", t: "4–8 Months", s: "2K–15K",
+              pkgs: [{name:"Development", price:"$349/mo", f:["5 Workflow Outputs", "Target Script"]}, {name:"Growth Matrix", price:"$599/mo", f:["10 Workflow Outputs", "Motion Metrics"], pop:true}, {name:"Enterprise", price:"$999/mo", f:["20 Targets", "Autonomous Setup"]}] },
+            { key: "gaming", icon: "🎮", name: "Digital Interactive", desc: "Gameplay, Esports, Hardware", r: "$2–$8", t: "2–5 Months", s: "5K–50K",
+              pkgs: [{name:"Development", price:"$199/mo", f:["8 Media Outputs", "Data Splicing"]}, {name:"Growth Matrix", price:"$399/mo", f:["15 Media Outputs", "Dynamic FX"], pop:true}, {name:"Enterprise", price:"$699/mo", f:["25 Outputs", "Full Scale Architecture"]}] }
+        ];
+
+        const catGrid = document.getElementById('cat-grid');
+        const catDetail = document.getElementById('cat-detail');
+
+        function renderCategories() {
+            catGrid.innerHTML = "";
+            ytCategories.forEach(cat => {
+                const badgeHtml = cat.badge ? `<div style="position:absolute; top:20px; right:20px; background:#fff; color:#000; font-size:0.7rem; padding:8px 14px; border-radius:8px; font-weight:800; text-transform:uppercase;">${cat.badge}</div>` : '';
+                const card = document.createElement('div');
+                card.className = `cat-card interactable`;
+                card.id = `cat-${cat.key}`;
+                card.innerHTML = `${badgeHtml} <div class="cat-icon">${cat.icon}</div> <div class="cat-name">${cat.name}</div> <p style="font-size:1.05rem; color:var(--text-muted); margin-top:1rem; line-height:1.6;">${cat.desc}</p>`;
+                card.onclick = () => showCatDetail(cat.key);
+                catGrid.appendChild(card);
+            });
+        }
+        renderCategories();
+
+        function showCatDetail(key) {
+            document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`cat-${key}`).classList.add('active');
+            const cat = ytCategories.find(c => c.key === key);
+            
+            let pkgsHtml = "";
+            cat.pkgs.forEach(pkg => {
+                const popBadge = pkg.pop ? `<div class="pkg-pop-badge">RECOMMENDED</div>` : '';
+                const borderStyle = pkg.pop ? `border-color: #fff; background: rgba(255,255,255,0.08);` : '';
+                let fList = "";
+                pkg.f.forEach(f => fList += `<div class="pkg-feat-row"><i class="fa-solid fa-check" style="color:#fff;"></i> ${f}</div>`);
+                
+                pkgsHtml += `<div class="pkg-card interactable" style="${borderStyle}">${popBadge}<h4 style="font-size:1.35rem; color:#fff; margin-bottom:1rem; letter-spacing:0;">${pkg.name}</h4><div style="font-size:3.5rem; color:#fff; line-height:1; margin-bottom:2.5rem; font-weight:800; letter-spacing:-0.04em;">${pkg.price.split('/')[0]}<span style="font-size:1.1rem; color:var(--text-muted); font-weight:500;">/${pkg.price.split('/')[1]}</span></div><div style="margin-bottom:3rem;">${fList}</div><button class="btn-outline interactable" style="width:100%; border-color:#fff;" onclick="window.open('https://wa.me/923217110706?text=Initiating%20${cat.key}%20package', '_blank')">Select Plan</button></div>`;
+            });
+
+            catDetail.innerHTML = `<div class="cdp-glow"></div><div style="position:relative; z-index:2;"><div style="text-align:left;"><div style="font-size:3rem; margin-bottom:1.5rem;">${cat.icon}</div><h3 style="font-size:3rem; line-height:1; margin-bottom:1.5rem; color:#fff; letter-spacing:-0.04em; font-weight:800;">${cat.name} System</h3><p style="color:var(--text-muted); font-size:1.25rem; max-width:700px;">${cat.desc}</p></div><div class="panel-stats"><div class="panel-stat-box interactable"><div style="font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:1rem; font-weight:700;">System RPM</div><div style="font-size:2.8rem; color:#fff; font-weight:800; letter-spacing:-2px;">${cat.r}</div></div><div class="panel-stat-box interactable"><div style="font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:1rem; font-weight:700;">Output Target</div><div style="font-size:2.8rem; color:#fff; font-weight:800; letter-spacing:-2px;">${cat.t}</div></div><div class="panel-stat-box interactable"><div style="font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:1rem; font-weight:700;">Year 1 Projections</div><div style="font-size:2.8rem; color:#fff; font-weight:800; letter-spacing:-2px;">${cat.s}</div></div></div><div class="pkg-grid">${pkgsHtml}</div></div>`;
+            catDetail.style.display = "block";
+            catDetail.scrollIntoView({behavior: "smooth", block: "center"});
+        }
+
+        function searchCat() {
+            const val = document.getElementById('catSearch').value.toLowerCase();
+            const found = ytCategories.find(c => c.name.toLowerCase().includes(val) || c.desc.toLowerCase().includes(val) || c.key.includes(val));
+            if(found) showCatDetail(found.key);
+        }
+
+        // Form Logic
+        function sendWhatsApp() {
+            const err = document.getElementById('form-err');
+            const fn = document.getElementById('fn').value;
+            const fe = document.getElementById('fe').value;
+            const fs = document.getElementById('fs').value;
+            const fd = document.getElementById('fd').value;
+
+            if(!fn || !fe || !fs || !fd) {
+                err.innerText = "Error: System parameters incomplete. Fill all required (*) fields.";
+                return;
+            }
+            err.innerText = "";
+            const msg = `*New Enterprise Payload*\n\n*ID:* ${fn}\n*Email:* ${fe}\n*Vector:* ${fs}\n\n*Data Sequence:*\n${fd}`;
+            window.open(`https://wa.me/923217110706?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Chatbot Logic
+        const chatWindow = document.getElementById('chatbot-window');
+        const chatBtn = document.querySelector('#chatbot-btn i');
+        const chatInput = document.getElementById('chat-input-text');
+        const chatBody = document.getElementById('chat-body');
+        
+        let chatOpen = false;
+        function toggleChat() {
+            chatOpen = !chatOpen;
+            if(chatOpen) {
+                chatWindow.classList.add('open');
+                chatBtn.className = "fa-solid fa-xmark";
+                chatInput.focus();
+            } else {
+                chatWindow.classList.remove('open');
+                chatBtn.className = "fa-solid fa-bolt";
+            }
+        }
+
+        function appendMsg(text, sender) {
+            const msg = document.createElement('div');
+            msg.className = `chat-msg ${sender === 'user' ? 'msg-usr' : 'msg-bot'}`;
+            msg.innerText = text;
+            chatBody.appendChild(msg);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function sendChatMsg() {
+            const text = chatInput.value.trim();
+            if(!text) return;
+            appendMsg(text, 'user');
+            chatInput.value = "";
+            
+            setTimeout(() => {
+                appendMsg("System command received. Due to backend architecture requirements, direct WhatsApp authorization is needed. Connect with Engineer Husnain at +92 321 7110706.", 'bot');
+            }, 800);
+        }
+
+        function sendQuickMsg(text) {
+            appendMsg(text, 'user');
+            setTimeout(() => {
+                appendMsg("Process mapping sequence started. Final pipeline integration requires a manual prompt. Start a secure thread via WhatsApp to execute deployment.", 'bot');
+            }, 700);
+        }
+
+        // WebGL Environment
+        // Include Three.js locally or dynamically if missing
+        const script = document.createElement('script');
+        script.onload = initThree;
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+        document.head.appendChild(script);
+
+        function initThree() {
+            const threeContainer = document.getElementById('threejs-canvas-wrapper');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, threeContainer.offsetWidth / threeContainer.offsetHeight, 0.1, 100);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            threeContainer.appendChild(renderer.domElement);
+            camera.position.z = 20;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+            scene.add(ambientLight);
+            
+            // Exact Fusion Lighting Mapping
+            const orangePosLight = new THREE.PointLight(0xE64510, 4, 50);
+            orangePosLight.position.set(6, 6, 2);
+            scene.add(orangePosLight);
+            
+            const bluePosLight = new THREE.PointLight(0x0A74FF, 4, 50);
+            bluePosLight.position.set(-6, -6, 5);
+            scene.add(bluePosLight);
+
+            const techGroup = new THREE.Group();
+            scene.add(techGroup);
+
+            const darkMetal = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.1, metalness: 0.95 });
+            
+            // Abstract floating structure
+            const core = new THREE.Mesh(new THREE.IcosahedronGeometry(3, 1), darkMetal);
+            techGroup.add(core); // Solid crystal core
+            
+            // Sci-Fi ring
+            const wireRing = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.05, 16, 64), new THREE.MeshBasicMaterial({color: 0x0A74FF, transparent:true, opacity:0.4}));
+            wireRing.rotation.x = Math.PI/2;
+            techGroup.add(wireRing);
+            
+            const secondRing = new THREE.Mesh(new THREE.TorusGeometry(5.2, 0.02, 16, 64), new THREE.MeshBasicMaterial({color: 0xE64510, transparent:true, opacity:0.4}));
+            secondRing.rotation.y = Math.PI/3;
+            techGroup.add(secondRing);
+
+            const outerWire = new THREE.Mesh(new THREE.SphereGeometry(6.5, 16, 12), new THREE.MeshBasicMaterial({color: 0xFFFFFF, wireframe: true, transparent:true, opacity:0.05}));
+            techGroup.add(outerWire);
+
+            let tx = 0, ty = 0, px=0, py=0, isDragging = false;
+            threeContainer.addEventListener('mousedown', (e) => { isDragging = true; px = e.clientX; py = e.clientY; });
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('mousemove', (e) => {
+                if(isDragging) { tx += (e.clientX - px)*0.01; ty += (e.clientY - py)*0.01; px = e.clientX; py = e.clientY; }
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = threeContainer.offsetWidth / threeContainer.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
+            });
+
+            function animateThree() {
+                requestAnimationFrame(animateThree);
+                if(!isDragging) { tx += 0.002; ty += 0.001; }
+                techGroup.rotation.y += (tx - techGroup.rotation.y) * 0.05;
+                techGroup.rotation.x += (ty - techGroup.rotation.x) * 0.05;
+                core.rotation.y += 0.005;
+                wireRing.rotation.x += 0.008;
+                secondRing.rotation.y -= 0.01;
+                renderer.render(scene, camera);
+            }
+            animateThree();
+        }
+    </script>
+</body>
+</html>
